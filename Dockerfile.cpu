@@ -5,7 +5,7 @@ MAINTAINER Sai Soundararaj <saip@outlook.com>
 ARG THEANO_VERSION=rel-0.8.2
 ARG TENSORFLOW_VERSION=0.8.0
 ARG TENSORFLOW_ARCH=cpu
-ARG KERAS_VERSION=1.0.3
+ARG KERAS_VERSION=1.2.0
 ARG LASAGNE_VERSION=v0.1
 ARG TORCH_VERSION=latest
 ARG CAFFE_VERSION=master
@@ -68,12 +68,20 @@ RUN apt-get update && apt-get install -y \
 		python-skimage \
 		python-matplotlib \
 		python-pandas \
-		python-sklearn \
 		python-sympy \
 		&& \
 	apt-get clean && \
 	apt-get autoremove && \
 	rm -rf /var/lib/apt/lists/*
+
+#Install dependencies for building sklearn - because for some reason the tutorial 
+# im looking at wants the dev version
+sudo apt-get install python-setuptools \
+                      libatlas-dev libatlas3gf-base
+git clone "https://github.com/scikit-learn/scikit-learn.git"
+cd scikit-learn
+make
+python setup.py install
 
 # Install other useful Python packages using pip
 RUN pip --no-cache-dir install --upgrade ipython && \
@@ -85,12 +93,22 @@ RUN pip --no-cache-dir install --upgrade ipython && \
 		Pillow \
 		pygments \
 		six \
+		bcolz \
+		opencv-python \
 		sphinx \
 		wheel \
 		zmq \
 		&& \
 	python -m ipykernel.kernelspec
 
+# Install dependencies for building sklearn - dev version
+sudo apt-get install python-setuptools \
+                      libatlas-dev libatlas3gf-base
+git clone "https://github.com/scikit-learn/scikit-learn.git"
+cd scikit-learn
+make
+sudo python setup.py install
+cd ..
 
 # Install TensorFlow
 RUN pip --no-cache-dir install \
